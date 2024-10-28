@@ -1,0 +1,6 @@
+### Database setup
+
+To initialize the database, run the following command from the command line (requires sudo permissions)::
+
+```bash
+sudo mysql -u root -p < database/setup.sql
