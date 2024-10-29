@@ -1,3 +1,4 @@
+// Service to interact with database
 package services
 
 import (
@@ -6,7 +7,6 @@ import (
 	"log"
 )
 
-// Service sto interact with database
 type DepartmentService struct {
     DB *sql.DB
 }
@@ -43,6 +43,7 @@ func (s *DepartmentService) DeleteDepartment(id int) error {
 }
 
 func (s *DepartmentService) GetHierarchy(parentID int) ([]models.Department, error) {
+    log.Printf("Calling GetHierarchy with parentID: %d", parentID)
     rows, err := s.DB.Query("CALL GetHierarchy(?)", parentID)
     if err != nil {
         log.Printf("Error while getting hierarchy: %v", err)
@@ -54,10 +55,19 @@ func (s *DepartmentService) GetHierarchy(parentID int) ([]models.Department, err
     for rows.Next() {
         var dept models.Department
         if err := rows.Scan(&dept.ID, &dept.Name, &dept.ParentID, &dept.Flags); err != nil {
-            log.Printf("Error while scanning row: %v", err)
+            log.Printf("Error scanning department: %v", err)
             return nil, err
         }
         departments = append(departments, dept)
     }
+
+    if err := rows.Err(); err != nil {
+        log.Printf("Error with rows: %v", err)
+        return nil, err
+    }
+
+    log.Printf("Fetched departments: %v", departments)
     return departments, nil
 }
+
+
