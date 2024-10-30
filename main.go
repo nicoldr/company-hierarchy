@@ -25,13 +25,20 @@ func main() {
     // Create a new Gin router
     router := gin.Default()
 
+    // Login endpoint
+    router.POST("/login", controllers.Login)
+
+    // JWT Authentication
+    authorized := router.Group("/")
+    authorized.Use(controllers.AuthenticateJWT())
+
     // Define a base route
     router.GET("/", func(c *gin.Context) {
         c.JSON(200, gin.H{"message": "Welcome to the Company Hierarchy API!"})
     })
 
     // Define routes for department management
-    controllers.SetupRoutes(router, database.DB)
+    controllers.SetupRoutes(authorized, database.DB)  // Protected routes (JWT)
 
     // Start the server on the specified port
     port := os.Getenv("PORT")

@@ -70,7 +70,7 @@ func (c *DepartmentController) GetHierarchy(ctx *gin.Context) {
     ctx.JSON(http.StatusOK, departments)
 }
 
-func SetupRoutes(router *gin.Engine, db *sql.DB) {
+func SetupRoutes(router *gin.RouterGroup, db *sql.DB) {
     departmentService := services.NewDepartmentService(db)
     departmentController := &DepartmentController{Service: departmentService}
 
