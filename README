@@ -1,6 +1,168 @@
-### Database setup
+# Company Hierarchy Management
 
-To initialize the database, run the following command from the command line (requires sudo permissions)::
+## Description
 
-```bash
-sudo mysql -u root -p < database/setup.sql
+This project is a web application for managing the hierarchy of departments within a company. It allows for the creation, updating, deletion, and hierarchical visualization of departments. The application is built using Golang and MySQL, with all database operations managed through stored procedures. Authentication is implemented using JWT to ensure secure access.
+
+## Features
+
+- **Department Management**:
+  - Create and update department information.
+  - Delete existing departments.
+- **Hierarchy Visualization**:
+  - Display a tree-like structure of departments hierarchycal order, based on a parent department.
+- **Authentication**:
+  - Secure access using JWT tokens.
+
+## Technologies Used
+
+- **Backend**: Golang
+- **Database**: MySQL (with stored procedures)
+- **Web Framework**: Gin
+- **Authentication**: JWT
+
+## Prerequisites
+
+- **Go**: Version 1.21 or later
+- **MySQL**: Ensure MySQL is installed and running
+
+## Setup Instructions:
+
+## 1. Start MySQL Server
+
+Ensure that your MySQL server is running. You can start it using the following command:
+
+```sh
+sudo service mysql start
+
+## 2. Clone the Repository
+
+```sh
+git clone https://github.com/nicoldr/company-hierarchy.git
+cd company-hierarchy
+
+## 3.  Database Setup
+**Create the database and tables**:
+sudo mysql -u root -p < database/setup.sql (requires sudo permissions)
+
+## 4.  Environment Variables
+Create a .env file in the root directory with the following details
+PORT=8080
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=<db_user>
+DB_PASSWORD=<db_password>
+DB_NAME=company_hierarchy
+APP_USER=<app_username>
+APP_PASSWORD=<app_password>
+JWT_SECRET=<jwt_secret>
+
+## 5. Install Dependencies
+go mod tidy
+
+## 6. Run the application
+go run main.go
+
+## API Endpoints
+
+### Authentication
+
+- **Login**: `POST /login`
+  - Request Body:
+    ```json
+    {
+      "username": "username",
+      "password": "password"
+    }
+    ```
+  - Response:
+    ```json
+    {
+      "token": "jwt_token"
+    }
+    ```
+
+### Department Management
+
+- **Add Department**: `POST /departments`
+  - Request Body:
+    ```json
+    {
+      "name": "IT",
+      "parent_id": 2,
+      "flags": 0
+    }
+    ```
+  - Response:
+    ```json
+    {
+      "id": 5,
+      "name": "IT",
+      "parent_id": 2,
+      "flags": 0
+    }
+    ```
+
+- **Update Department**: `PUT /departments/:id`
+  - Request Body:
+    ```json
+    {
+      "name": "IT",
+      "parent_id": 2,
+      "flags": 1
+    }
+    ```
+  - Response:
+    ```json
+    {
+      "id": 5,
+      "name": "IT",
+      "parent_id": 2,
+      "flags": 1
+    }
+    ```
+
+- **Delete Department**: `DELETE /departments/:id`
+  - Response: `204 No Content`
+
+### Hierarchy Visualization
+
+- **Get Hierarchy**: `GET /departments/hierarchy/:parent_id`
+  - Response:
+    ```json
+    [
+      {
+        "id": 3,
+        "name": "Recruitment",
+        "parent_id": 1,
+        "flags": 0
+      }
+    ]
+    ```
+## 7. Test the API Endpoints, example requests
+In another terminal use the following curl commands to test the API endpoints.
+
+### Obtain Token
+TOKEN=$(curl -s -X POST http://localhost:8080/login \
+-H "Content-Type: application/json" \
+-d '{"username": "admiapp_username", "password": "app_password"}' | jq -r '.token')
+
+### Add Department
+curl -X POST http://localhost:8080/departments \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer $TOKEN" \
+-d '{"name": "New Department", "parent_id": 1, "flags": 1}'
+
+### Get Hierarchy
+curl -X GET http://localhost:8080/departments/hierarchy/1 \
+-H "Authorization: Bearer $TOKEN"
+
+### Update Department
+curl -X PUT http://localhost:8080/departments/1 \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer $TOKEN" \
+-d '{"name": "Updated Department", "parent_id": 1, "flags": 1}'
+
+### Delete Department
+curl -X DELETE http://localhost:8080/departments/1 \
+-H "Authorization: Bearer $TOKEN"
