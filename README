@@ -145,7 +145,7 @@ In another terminal use the following curl commands to test the API endpoints.
 ### Obtain Token
 TOKEN=$(curl -s -X POST http://localhost:8080/login \
 -H "Content-Type: application/json" \
--d '{"username": "admiapp_username", "password": "app_password"}' | jq -r '.token')
+-d '{"username": "app_username", "password": "app_password"}' | jq -r '.token')
 
 ### Add Department
 curl -X POST http://localhost:8080/departments \

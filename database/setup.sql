@@ -29,7 +29,10 @@ CREATE PROCEDURE UpdateDepartment(
 )
 BEGIN
     UPDATE departments
-    SET name = dept_name, parent_id = dept_parent_id, flags = dept_flags
+    SET
+        name = COALESCE(dept_name, name),
+        parent_id = COALESCE(dept_parent_id, parent_id),
+        flags = COALESCE(dept_flags, flags)
     WHERE id = dept_id;
 END //
 
@@ -46,8 +49,17 @@ CREATE PROCEDURE GetHierarchy(
     IN dept_parent_id INT
 )
 BEGIN
-    SELECT * FROM departments
-    WHERE parent_id = dept_parent_id AND (flags & 1) = 0; -- Exclude deleted departments
+    WITH RECURSIVE department_hierarchy AS (
+        SELECT id, name, parent_id, flags
+        FROM departments
+        WHERE id = dept_parent_id AND (flags & 1) = 0
+        UNION ALL
+        SELECT d.id, d.name, d.parent_id, d.flags
+        FROM departments d
+        INNER JOIN department_hierarchy dh ON dh.id = d.parent_id
+        WHERE (d.flags & 1) = 0
+    )
+    SELECT * FROM department_hierarchy;
 END //
 
 DELIMITER ;

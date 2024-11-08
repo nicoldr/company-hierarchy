@@ -70,4 +70,9 @@ func (s *DepartmentService) GetHierarchy(parentID int) ([]models.Department, err
     return departments, nil
 }
 
-
+func (s *DepartmentService) GetDepartmentByID(id int) (models.Department, error) {
+    var dept models.Department
+    row := s.DB.QueryRow("SELECT id, name, parent_id, flags FROM departments WHERE id = ?", id)
+    err := row.Scan(&dept.ID, &dept.Name, &dept.ParentID, &dept.Flags)
+    return dept, err
+}

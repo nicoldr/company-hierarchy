@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Controller struct
+// Controller struct to manage requests
 type DepartmentController struct {
     Service *services.DepartmentService
 }
@@ -29,11 +29,41 @@ func (c *DepartmentController) AddDepartment(ctx *gin.Context) {
 }
 
 func (c *DepartmentController) UpdateDepartment(ctx *gin.Context) {
-    var dept models.Department
-    if err := ctx.ShouldBindJSON(&dept); err != nil {
+    idStr := ctx.Param("id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+        return
+    }
+
+    var input struct {
+        Name     *string `json:"name"`
+        ParentID *int    `json:"parent_id"`
+        Flags    *int    `json:"flags"`
+    }
+    if err := ctx.ShouldBindJSON(&input); err != nil {
         ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
         return
     }
+
+    // Fetch the current department details
+    dept, err := c.Service.GetDepartmentByID(id)
+    if err != nil {
+        ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Could not fetch department"})
+        return
+    }
+
+    // Update only the provided fields
+    if input.Name != nil {
+        dept.Name = *input.Name
+    }
+    if input.ParentID != nil {
+        dept.ParentID = input.ParentID
+    }
+    if input.Flags != nil {
+        dept.Flags = *input.Flags
+    }
+
     if err := c.Service.UpdateDepartment(dept); err != nil {
         ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Could not update department"})
         return
