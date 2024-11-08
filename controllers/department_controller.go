@@ -71,6 +71,34 @@ func (c *DepartmentController) UpdateDepartment(ctx *gin.Context) {
     ctx.JSON(http.StatusOK, dept)
 }
 
+func (c *DepartmentController) ActivateDepartment(ctx *gin.Context) {
+    idStr := ctx.Param("id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+        return
+    }
+    if err := c.Service.ActivateDepartment(id); err != nil {
+        ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Could not activate department"})
+        return
+    }
+    ctx.JSON(http.StatusNoContent, nil)
+}
+
+func (c *DepartmentController) DeactivateDepartment(ctx *gin.Context) {
+    idStr := ctx.Param("id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+        return
+    }
+    if err := c.Service.DeactivateDepartment(id); err != nil {
+        ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Could not deactivate department"})
+        return
+    }
+    ctx.JSON(http.StatusNoContent, nil)
+}
+
 func (c *DepartmentController) DeleteDepartment(ctx *gin.Context) {
     idStr := ctx.Param("id")
     id, err := strconv.Atoi(idStr) // Convert string to int
@@ -80,6 +108,48 @@ func (c *DepartmentController) DeleteDepartment(ctx *gin.Context) {
     }
     if err := c.Service.DeleteDepartment(id); err != nil {
         ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Could not delete department"})
+        return
+    }
+    ctx.JSON(http.StatusNoContent, nil)
+}
+
+func (c *DepartmentController) RestoreDepartment(ctx *gin.Context) {
+    idStr := ctx.Param("id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+        return
+    }
+    if err := c.Service.RestoreDepartment(id); err != nil {
+        ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Could not restore department"})
+        return
+    }
+    ctx.JSON(http.StatusNoContent, nil)
+}
+
+func (c *DepartmentController) ApproveDepartment(ctx *gin.Context) {
+    idStr := ctx.Param("id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+        return
+    }
+    if err := c.Service.ApproveDepartment(id); err != nil {
+        ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Could not approve department"})
+        return
+    }
+    ctx.JSON(http.StatusNoContent, nil)
+}
+
+func (c *DepartmentController) UnapproveDepartment(ctx *gin.Context) {
+    idStr := ctx.Param("id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+        return
+    }
+    if err := c.Service.UnapproveDepartment(id); err != nil {
+        ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Could not unapprove department"})
         return
     }
     ctx.JSON(http.StatusNoContent, nil)
@@ -108,7 +178,12 @@ func SetupRoutes(router *gin.RouterGroup, db *sql.DB) {
     {
         departmentGroup.POST("/", departmentController.AddDepartment)
         departmentGroup.PUT("/:id", departmentController.UpdateDepartment)
+        departmentGroup.PUT("/:id/activate", departmentController.ActivateDepartment)
+        departmentGroup.PUT("/:id/deactivate", departmentController.DeactivateDepartment)
         departmentGroup.DELETE("/:id", departmentController.DeleteDepartment)
+        departmentGroup.PUT("/:id/restore", departmentController.RestoreDepartment)
+        departmentGroup.PUT("/:id/approve", departmentController.ApproveDepartment)
+        departmentGroup.PUT("/:id/unapprove", departmentController.UnapproveDepartment)
         departmentGroup.GET("/hierarchy/:parent_id", departmentController.GetHierarchy)
     }
 }

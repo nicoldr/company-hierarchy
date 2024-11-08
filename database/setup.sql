@@ -2,6 +2,16 @@ CREATE DATABASE IF NOT EXISTS company_hierarchy;
 
 USE company_hierarchy;
 
+DROP PROCEDURE IF EXISTS AddDepartment;
+DROP PROCEDURE IF EXISTS UpdateDepartment;
+DROP PROCEDURE IF EXISTS ActivateDepartment;
+DROP PROCEDURE IF EXISTS DeactivateDepartment;
+DROP PROCEDURE IF EXISTS DeleteDepartment;
+DROP PROCEDURE IF EXISTS RestoreDepartment;
+DROP PROCEDURE IF EXISTS ApproveDepartment;
+DROP PROCEDURE IF EXISTS UnapproveDepartment;
+DROP PROCEDURE IF EXISTS GetHierarchy;
+
 CREATE TABLE IF NOT EXISTS departments (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(50) NOT NULL,
@@ -36,12 +46,57 @@ BEGIN
     WHERE id = dept_id;
 END //
 
+CREATE PROCEDURE ActivateDepartment(
+    IN dept_id INT
+)
+BEGIN
+    UPDATE departments
+    SET flags = flags | 1 -- Mark as active
+    WHERE id = dept_id;
+END //
+
+CREATE PROCEDURE DeactivateDepartment(
+    IN dept_id INT
+)
+BEGIN
+    UPDATE departments
+    SET flags = flags & ~1 -- Mark as inactive
+    WHERE id = dept_id;
+END //
+
 CREATE PROCEDURE DeleteDepartment(
     IN dept_id INT
 )
 BEGIN
     UPDATE departments
-    SET flags = flags | 1 -- Set bit 1 to mark as deleted
+    SET flags = flags | 2 -- Mark as deleted
+    WHERE id = dept_id;
+END //
+
+CREATE PROCEDURE RestoreDepartment(
+    IN dept_id INT
+)
+BEGIN
+    UPDATE departments
+    SET flags = flags & ~2 -- Mark as restored (not deleted)
+    WHERE id = dept_id;
+END //
+
+CREATE PROCEDURE ApproveDepartment(
+    IN dept_id INT
+)
+BEGIN
+    UPDATE departments
+    SET flags = flags | 4 -- Mark as approved
+    WHERE id = dept_id;
+END //
+
+CREATE PROCEDURE UnapproveDepartment(
+    IN dept_id INT
+)
+BEGIN
+    UPDATE departments
+    SET flags = flags & ~4 -- Mark as not approved
     WHERE id = dept_id;
 END //
 

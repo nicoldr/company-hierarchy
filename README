@@ -4,6 +4,24 @@
 
 This project is a web application for managing the hierarchy of departments within a company. It allows for the creation, updating, deletion, and hierarchical visualization of departments. The application is built using Golang and MySQL, with all database operations managed through stored procedures. Authentication is implemented using JWT to ensure secure access.
 
+## Bitwise Representation of `flags`
+
+The `flags` field uses bitwise representation to indicate multiple states of a department:
+
+- **Bit 1 (Least Significant Bit)**: Active (1) / Inactive (0)
+- **Bit 2**: Deleted (1) / Not Deleted (0)
+- **Bit 3**: Approved (1) / Not Approved (0)
+
+Examples:
+- `000` (binary) = `0` (decimal): Inactive, Restored (Not Deleted), Not Approved
+- `001` (binary) = `1` (decimal): Active, Restored (Not Deleted), Not Approved
+- `010` (binary) = `2` (decimal): Inactive, Deleted, Not Approved
+- `011` (binary) = `3` (decimal): Active, Deleted, Not Approved
+- `100` (binary) = `4` (decimal): Inactive, Restored (Not Deleted), Approved
+- `101` (binary) = `5` (decimal): Active, Restored (Not Deleted), Approved
+- `110` (binary) = `6` (decimal): Inactive, Deleted, Approved
+- `111` (binary) = `7` (decimal): Active, Deleted, Approved
+
 ## Features
 
 - **Department Management**:
@@ -121,8 +139,22 @@ go run main.go
       "flags": 1
     }
     ```
+- **Activate Department**: `PUT /departments/:id/activate`
+  - Response: `204 No Content`
+
+- **Deactivate Department**: `PUT /departments/:id/deactivate`
+  - Response: `204 No Content`
 
 - **Delete Department**: `DELETE /departments/:id`
+  - Response: `204 No Content`
+
+- **Restore Department**: `PUT /departments/:id/restore`
+  - Response: `204 No Content`
+
+- **Approve Department**: `PUT /departments/:id/approve`
+  - Response: `204 No Content`
+
+- **Unapprove Department**: `PUT /departments/:id/unapprove`
   - Response: `204 No Content`
 
 ### Hierarchy Visualization
@@ -148,21 +180,29 @@ TOKEN=$(curl -s -X POST http://localhost:8080/login \
 -d '{"username": "app_username", "password": "app_password"}' | jq -r '.token')
 
 ### Add Department
-curl -X POST http://localhost:8080/departments \
--H "Content-Type: application/json" \
--H "Authorization: Bearer $TOKEN" \
--d '{"name": "New Department", "parent_id": 1, "flags": 1}'
-
-### Get Hierarchy
-curl -X GET http://localhost:8080/departments/hierarchy/1 \
--H "Authorization: Bearer $TOKEN"
+curl -X POST http://localhost:8080/departments/ -H "C
+ontent-Type: application/json" -H "Authorization: Bearer $TOKEN" -d '{"name": "Marketing", "parent_id": 1, "flags": 0}'
 
 ### Update Department
-curl -X PUT http://localhost:8080/departments/1 \
--H "Content-Type: application/json" \
--H "Authorization: Bearer $TOKEN" \
--d '{"name": "Updated Department", "parent_id": 1, "flags": 1}'
+curl -X PUT http://localhost:8080/departments/1 -H "Content-Type: application/json" -H "Authorization: Bearer $TOKEN" -d '{"flags": 1}'
+
+### Activate Department
+curl -X PUT http://localhost:8080/departments/4/activate -H "Authorization: Bearer $TOKEN"
+
+### Deactivate Department
+curl -X PUT http://localhost:8080/departments/4/deactivate -H "Authorization: Bearer $TOKEN"
 
 ### Delete Department
-curl -X DELETE http://localhost:8080/departments/1 \
--H "Authorization: Bearer $TOKEN"
+curl -X DELETE http://localhost:8080/departments/4 -H "Authorization: Bearer $TOKEN"
+
+### Restore Department:
+curl -X PUT http://localhost:8080/departments/4/restore -H "Authorization: Bearer $TOKEN"
+
+### Approve Department:
+curl -X PUT http://localhost:8080/departments/4/approve -H "Authorization: Bearer $TOKEN"
+
+### Unapprove Department:
+curl -X PUT http://localhost:8080/departments/4/unapprove -H "Authorization: Bearer $TOKEN"
+
+### Get Hierarchy
+curl -X GET http://localhost:8080/departments/hierarchy/2 -H "Authorization: Bearer $TOKEN"

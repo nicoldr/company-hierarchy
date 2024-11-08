@@ -33,10 +33,55 @@ func (s *DepartmentService) UpdateDepartment(dept models.Department) error {
     return nil
 }
 
+func (s *DepartmentService) ActivateDepartment(id int) error {
+    _, err := s.DB.Exec("CALL ActivateDepartment(?)", id)
+    if err != nil {
+        log.Printf("Error while marking department as active: %v", err)
+        return err
+    }
+    return nil
+}
+
+func (s *DepartmentService) DeactivateDepartment(id int) error {
+    _, err := s.DB.Exec("CALL DeactivateDepartment(?)", id)
+    if err != nil {
+        log.Printf("Error while marking department as deactivated: %v", err)
+        return err
+    }
+    return nil
+}
+
 func (s *DepartmentService) DeleteDepartment(id int) error {
     _, err := s.DB.Exec("CALL DeleteDepartment(?)", id)
     if err != nil {
         log.Printf("Error while deleting department: %v", err)
+        return err
+    }
+    return nil
+}
+
+func (s *DepartmentService) RestoreDepartment(id int) error {
+    _, err := s.DB.Exec("CALL RestoreDepartment(?)", id)
+    if err != nil {
+        log.Printf("Error while marking department as not deleted: %v", err)
+        return err
+    }
+    return nil
+}
+
+func (s *DepartmentService) ApproveDepartment(id int) error {
+    _, err := s.DB.Exec("CALL ApproveDepartment(?)", id)
+    if err != nil {
+        log.Printf("Error while marking department as approved: %v", err)
+        return err
+    }
+    return nil
+}
+
+func (s *DepartmentService) UnapproveDepartment(id int) error {
+    _, err := s.DB.Exec("CALL UnapproveDepartment(?)", id)
+    if err != nil {
+        log.Printf("Error while marking department as not approved: %v", err)
         return err
     }
     return nil
